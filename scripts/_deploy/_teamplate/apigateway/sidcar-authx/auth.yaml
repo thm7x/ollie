@@ -1,0 +1,17 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: external-authx
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  action: CUSTOM
+  provider:
+    name: ext-grpc-authx
+  rules:
+    - to:
+        - operation:
+            #开放path 
+            notPaths: ["/api/release/Ping","/api/account/GetLoginQR","/login",/api/account/WxLogin]
+            paths: ["/api/*"]

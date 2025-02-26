@@ -1,0 +1,5 @@
+#version/branch : [...uid]
+# 上面这些配置灰度map信息仅会由authx服务热更新读取。然后解析jwt获取uid，来进行流量拦截并染色x-api-version:verison。
+# 这样内外网关流量都基于x-api-version header来控制。不在频繁更新版本dr yaml的配置  
+# 新服务 网关yaml生效之后 新pod程序没启动就绪之前不会染色版本的，所以不会有灰度流量匹配版本进来-安全 
+v24.0928: 98375254,8635402

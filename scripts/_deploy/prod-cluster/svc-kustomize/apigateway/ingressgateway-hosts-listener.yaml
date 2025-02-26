@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: api-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "cd2.szbinze.cc"
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: true
+  - hosts:
+    - "cd2.szbinze.cc"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: cd2.szbinze.cc-tls # 使用 certificate.yaml 存储签发证书的 Secret: cd2.szbinze.cc-tls
+      # kubectl create secret tls cd2.szbinze.cc-tls --key cd2.szbinze.cc.key --cert cd2.szbinze.cc.pem --dry-run=client -o yaml | kubectl apply -f - -n env-api-gateway

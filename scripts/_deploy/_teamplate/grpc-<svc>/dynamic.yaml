@@ -1,0 +1,6 @@
+app:
+  tickDuration: 5
+  rolloutFaildCount: 10 #最大发布失败重试次数
+  feishu:
+    app_id: cli_a441f47133ba500c
+    app_secret: gxlUVjYeu5Mswxk0E4ekneMqHAgQAVML

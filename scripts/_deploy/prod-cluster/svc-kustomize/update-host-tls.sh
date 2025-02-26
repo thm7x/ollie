@@ -1,0 +1,1 @@
+kubectl create secret tls cd.szbinze.cc-tls --key cd.szbinze.cc.key --cert cd.szbinze.cc.pem --dry-run=client -o yaml | kubectl apply -f - -n env-api-gateway

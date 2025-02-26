@@ -1,0 +1,16 @@
+kitex:
+  service: "authx"
+  address: ":7000"
+  log_level: info
+  log_dir: "logs"
+  log_max_size: 10
+  log_max_age: 3
+  log_max_backups: 50
+
+
+postgres:
+  dsn: "host=code.pypygo.com user=postgres password=123456789 dbname=devops port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+redis:
+  address: "127.0.0.1:6379"
+  username: ""
+  password: ""

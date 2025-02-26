@@ -1,0 +1,16 @@
+:80 {
+    root * /app/srv
+    encode gzip zstd
+    log stdout
+    header {
+            Access-Control-Allow-Origin "*"
+            Access-Control-Allow-Credentials true
+            Access-Control-Allow-Methods *
+            Access-Control-Allow-Headers DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+    }
+    route {
+            reverse_proxy /api/* istio-ingressgateway.env-api-gateway.svc.cluster.local
+            try_files {path} /index.html
+            file_server
+    }
+}

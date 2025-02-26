@@ -1,0 +1,13 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: web-admin
+spec:
+  hosts:
+  - web-admin
+  http:
+  # 默认出口
+  - route:
+    - destination:
+        host: web-admin
+        subset: primary

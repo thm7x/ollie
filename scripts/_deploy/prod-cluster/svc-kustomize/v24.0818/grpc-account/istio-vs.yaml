@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: account
+spec:
+  hosts:
+  - account
+  http:
+  - match:
+    - headers:
+        x-api-version:
+          exact: v24.0818
+    name: v24.0818_grpc-account
+    route:
+    - destination:
+        host: account
+        subset: v24.0818

@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configMapGenerator:
+  - name: global-gray-release-cm
+    files:
+      - _gray_release_cm.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  # 一个集群一个cd controller配置
+  - flux-gitrepo.yaml
+
+  #线上单一全量版本
+  - ns.yaml
+  - ./apigateway/
+  - ./primary
+
+  #线上灰度release版本 
+  - ./v24.0818
+  - ./v24.0923

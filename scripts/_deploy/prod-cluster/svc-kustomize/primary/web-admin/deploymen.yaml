@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-admin-primary
+  labels:
+    project: devops
+    service: web-admin
+    version: primary
+spec:
+  selector:
+    matchLabels:
+      project: devops
+      service: web-admin
+      version: primary
+  replicas: 1
+  template:
+    metadata:
+      # annotations:
+      #   sidecar.istio.io/proxyImage: ccr.ccs.tencentyun.com/vertex/ollie-istio-proxy:c58c7b3
+        # sidecar.istio.io/proxyMemory: 1024Mi
+        # sidecar.istio.io/proxyMemoryLimit: 1024Mi
+      labels:
+        project: devops
+        service: web-admin
+        version: primary
+        service-type: web #grpc / http / web
+    spec:
+      nodeSelector:
+        node1: env-prod-web #env-prod-grpc / env-prod-http / env-prod-web
+      imagePullSecrets:
+        - name: image-pull-registry
+      containers:
+        - name: web #grpc / http
+          image: ccr.ccs.tencentyun.com/vertex/ollie-admin:24a5804
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "0.15"
+              memory: 400Mi
+            requests:
+              memory: 100Mi
+          env:
+            - name: RUNING_ENV_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: RUNING_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: RUNING_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: timezone
+              mountPath: /etc/localtime
+            - mountPath: /etc/caddy
+              name: caddy-config-yamlfile
+            # - mountPath: /app/logs
+            #   name: logs-volume
+      volumes:
+        - name: timezone
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - configMap:
+            name: caddy-cm
+          name: caddy-config-yamlfile
+        # - hostPath:
+        #     path: /data/logs
+        #     type: DirectoryOrCreate
+        #   name: logs-volume

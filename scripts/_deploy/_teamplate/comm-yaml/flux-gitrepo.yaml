@@ -1,0 +1,44 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: <project>-repo
+  namespace: flux-system
+spec:
+  interval: 5m #git clone间隔
+  url: https://code.pypygo.com/vertex/<project>.git ##TODO
+  ref:
+    branch: main
+  secretRef:
+    name: git-clone-https
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git-clone-https
+  namespace: flux-system
+type: Opaque
+data:
+  # password: base64-Personal-Access-Token
+  # username: base64-user-name
+  password: Z2hwX0tnQ1VNS1dPQ2s1M3BGZlVvUW1ZSm1EM1BqUnA3TTRiVFB5UA==
+  username: dGhtN3g=
+---
+
+#env-prod 环境的gitops
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: <project>-kz
+  namespace: flux-system
+spec:
+  path: "./kustomize/env-prod"
+
+  interval: 10m # apply间隔
+  suspend: true #暂停同步,恢复则直接注释掉该行即可
+  prune: true #强一致性同步
+  targetNamespace: flux-system #关联指定ns里的source
+  sourceRef:
+    kind: GitRepository
+    name: <project>-repo
+
+  timeout: 1m

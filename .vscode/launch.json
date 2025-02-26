@@ -1,0 +1,26 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "AccountDebug",
+      "type": "go",
+      "request": "launch",//启动调试
+      "mode": "debug",
+      "cwd": "${workspaceFolder}/apps/account", //工作目录
+      "program": "${workspaceFolder}/apps/account",//main包多文件，直接指定目录即可
+      "env": {"NAMESPACE":"local"},
+      "args": [],
+      "showLog": true
+    },
+    {
+      "name": "WebDebug",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/apps/web/src"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+# https://istio.io/latest/docs/setup/additional-setup/gateway/
+# https://istio.io/v1.10/blog/2021/better-external-authz/
+# yaml方式部署istio ingressgateway 网关
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-ingressgateway-with-authx
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+      app: api-gateway
+  template:
+    metadata:
+      annotations:
+        # Select the gateway injection template (rather than the default sidecar template)
+        inject.istio.io/templates: gateway
+      labels:
+        # Set a unique label for the gateway. This is required to ensure Gateways can select this workload
+        istio: ingressgateway
+        app: api-gateway
+        # Enable gateway injection. If connecting to a revisioned control plane, replace with "istio.io/rev: revision-name"
+        sidecar.istio.io/inject: "true"
+    spec:
+      # Allow binding to all ports (such as 80 and 443)
+      securityContext:
+        sysctls:
+        - name: net.ipv4.ip_unprivileged_port_start
+          value: "0"
+      imagePullSecrets:
+      - name: image-pull-registry
+      containers:
+      - name: istio-proxy
+        image: ccr.ccs.tencentyun.com/vertex/ollie-apigateway:20c197f
+        resources:
+          limits:
+            cpu: "0.15"
+            memory: 400Mi
+          requests:
+            memory: 100Mi
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          runAsUser: 1337
+          runAsGroup: 1337
+        volumeMounts:
+        - name: timezone
+          mountPath: /etc/localtime
+        # - mountPath: /app/logs
+        #   name: logs-volume
+      - name: grpc-authx
+        image: ccr.ccs.tencentyun.com/vertex/ollie-authx:b91098e #kubectl  -n env-api-gateway logs istio-ingressgateway-with-authx-764c4b4f65-c7kvl -c grpc-authx
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 7000
+        resources:
+          limits:
+            cpu: "0.15"
+            memory: 400Mi
+          requests:
+            memory: 100Mi
+        livenessProbe:
+          grpc:
+            port: 7000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          grpc:
+            port: 7000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        volumeMounts:
+        - name: timezone
+          mountPath: /etc/localtime
+        - mountPath: /app/conf
+          name: authx-conf-yamlfile
+        - mountPath: /app/casbin
+          name: casbin-rbac-model-config-yamlfile
+        - mountPath: /app/gray #./gray/_gray_release_cm.yaml
+          name: global-gray-release-config-yamlfile
+        # - mountPath: /app/logs
+        #   name: logs-volume
+      volumes:
+        - name: timezone
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - configMap:
+            name: authx-cm
+          name: authx-conf-yamlfile
+        - configMap:
+            name: casbin-rbac-model-cm
+          name: casbin-rbac-model-config-yamlfile
+        - configMap:
+            name: global-gray-release-cm
+          name: global-gray-release-config-yamlfile
+        # - hostPath:
+        #     path: /data/logs
+        #     type: DirectoryOrCreate
+        #   name: logs-volume

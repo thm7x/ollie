@@ -1,0 +1,27 @@
+- op: replace
+  path: /spec/replicas
+  value: 1
+
+- op: replace
+  path: /spec/template/spec/containers/0/image
+  value: ccr.ccs.tencentyun.com/vertex/ollie-apigateway:dd52d13
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources/limits/memory
+  value: 1024Mi
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources/limits/cpu
+  value: 0.25
+
+- op: replace
+  path: /spec/template/spec/containers/1/image
+  value: ccr.ccs.tencentyun.com/vertex/ollie-authx:dd52d13
+
+- op: replace
+  path: /spec/template/spec/containers/1/resources/limits/memory
+  value: 500Mi
+
+- op: replace
+  path: /spec/template/spec/containers/1/resources/limits/cpu
+  value: 0.15

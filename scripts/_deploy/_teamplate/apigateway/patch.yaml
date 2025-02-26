@@ -1,0 +1,27 @@
+- op: replace
+  path: /spec/replicas
+  value: 1
+
+- op: replace
+  path: /spec/template/spec/containers/0/image
+  value: <imagens>/<project>-apigateway:7c35f3e
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources/limits/memory
+  value: 1024Mi
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources/limits/cpu
+  value: 0.25
+
+- op: replace
+  path: /spec/template/spec/containers/1/image
+  value: <imagens>/<project>-authx:b96a384
+
+- op: replace
+  path: /spec/template/spec/containers/1/resources/limits/memory
+  value: 500Mi
+
+- op: replace
+  path: /spec/template/spec/containers/1/resources/limits/cpu
+  value: 0.15

@@ -1,0 +1,37 @@
+# https://istio.io/latest/blog/2021/better-external-authz/
+# kubectl edit configmap istio -n istio-system 
+# kubectl get configmap istio -n istio-system -o yaml > istio-configmap.yaml TODO 提取默认的然后更新归档，方便apply方式更新
+apiVersion: v1
+data:
+  mesh: |-
+    # Add the following contents:
+    extensionProviders:
+    - name: "ext-grpc-authx"
+      envoyExtAuthzGrpc:
+        service: "local-grpc-authx.local"
+        port: "7000"
+    defaultConfig:
+      discoveryAddress: istiod.istio-system.svc:15012
+      proxyMetadata: {}
+      tracing:
+        zipkin:
+          address: zipkin.istio-system:9411
+    defaultProviders:
+      metrics:
+      - prometheus
+    enablePrometheusMerge: true
+    rootNamespace: istio-system
+    trustDomain: cluster.local
+  meshNetworks: 'networks: {}'
+kind: ConfigMap
+metadata:
+  labels:
+    install.operator.istio.io/owning-resource: installed-state
+    install.operator.istio.io/owning-resource-namespace: istio-system
+    istio.io/rev: default
+    operator.istio.io/component: Pilot
+    operator.istio.io/managed: Reconcile
+    operator.istio.io/version: 1.19.3
+    release: istio
+  name: istio
+  namespace: istio-system

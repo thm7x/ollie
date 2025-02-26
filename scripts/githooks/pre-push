@@ -1,0 +1,7 @@
+#!/bin/bash
+echo "push之前执行..."
+# 检查push分支类型: 
+# release/<version> | hotfix/<version> 的话，执行更新kustomize/prod-cluster里的服务manifest 文件
+# feature/xxx 的话，执行执行更新kustomize/dev-cluster里的服务manifest 文件
+
+# 线上ci runner操作manifest 内容，仅构建当前commit hash code的服务镜像并推送到镜像hub:即为只构建容器image。存档main。打tag

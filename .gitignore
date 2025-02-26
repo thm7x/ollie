@@ -1,0 +1,15 @@
+apps/**/.env
+apps/**/logs/
+apps/**/tmp/
+apps/**/local/
+apps/**/kitex_gen/
+apps/**/main
+
+
+tmp/
+
+go.work.sum
+
+
+
+

@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: api-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "<domain>"
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: true
+  - hosts:
+    - "<domain>"
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: <domain>-tls # 使用 certificate.yaml 存储签发证书的 Secret: <domain>-tls
+      # kubectl create secret tls <domain>-tls --key <domain>.key --cert <domain>.pem --dry-run=client -o yaml | kubectl apply -f - -n env-api-gateway

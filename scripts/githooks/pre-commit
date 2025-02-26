@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "commit之前执行..."

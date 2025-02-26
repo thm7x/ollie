@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: account
+  labels:
+    project: devops
+    service: account
+    service-type: grpc #grpc / http
+spec:
+  selector:
+    service: account
+  ports:
+    - port: 7001
+      name: grpc-account #grpc: grpc前缀
+      targetPort: 7001

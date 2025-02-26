@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-admin
+  labels:
+    project: devops
+    service: web-admin
+    service-type: web #grpc / http / web
+spec:
+  selector:
+    service: web-admin
+  ports:
+    - port: 80
+      name: web-web-admin
+      targetPort: 80

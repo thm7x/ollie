@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: env-prod
+resources:
+  # - conf-cm.yaml
+  - service.yaml
+  - deploymen.yaml
+  - istio-dr.yaml
+  - istio-vs.yaml
+
+configMapGenerator:
+  - name: account-cm
+    files:
+      - conf.yaml
+      - dynamic.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+
+commonLabels: 
+    service: account
+    service-type: grpc
+
+# 精准更改指定deployment的pod配置
+patches:
+- target:
+    kind: Deployment
+    name: account-primary
+  path: patch.yaml

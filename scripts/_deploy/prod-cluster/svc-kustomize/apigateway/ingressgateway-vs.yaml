@@ -1,0 +1,96 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-gateway-backend
+spec:
+  exportTo:
+  - .
+  gateways:
+  - api-gateway
+  hosts:
+  - "cd2.szbinze.cc"
+  http:
+  - match:
+    - uri:
+        prefix: /api/account
+    - uri:
+        prefix: /account.Account
+    name: account_v24.0928
+    retries:
+      attempts: 5
+      retryOn: connect-failure,unavailable,503
+    route:
+    - destination:
+        host: account.env-prod.svc.cluster.local
+        subset: v24.0928
+    corsPolicy:
+      allowOrigin:
+      - "*"
+      allowMethods:
+      - POST
+      - GET
+      allowHeaders:
+      - "*"
+      maxAge: "24h"
+  - match:
+    - uri:
+        prefix: /api/release
+    - uri:
+        prefix: /release.Release
+    name: release_primary
+    retries:
+      attempts: 5
+      retryOn: connect-failure,unavailable,503
+    route:
+    - destination:
+        host: release.env-prod.svc.cluster.local
+        subset: primary
+    corsPolicy:
+      allowOrigin:
+      - "*"
+      allowMethods:
+      - POST
+      - GET
+      allowHeaders:
+      - "*"
+      maxAge: "24h"
+  - match:
+    - uri:
+        prefix: /api/account
+    - uri:
+        prefix: /account.Account
+    name: account_primary
+    retries:
+      attempts: 5
+      retryOn: connect-failure,unavailable,503
+    route:
+    - destination:
+        host: account.env-prod.svc.cluster.local
+        subset: primary
+    corsPolicy:
+      allowOrigin:
+      - "*"
+      allowMethods:
+      - POST
+      - GET
+      allowHeaders:
+      - "*"
+      maxAge: "24h"
+  - match:
+    - uri:
+        prefix: /
+    name: primary-static-site-release-admin
+    route:
+    - destination:
+        host: release-admin.env-prod.svc.cluster.local
+        port:
+          number: 80
+    corsPolicy:
+      allowOrigin:
+      - "*"
+      allowMethods:
+      - POST
+      - GET
+      allowHeaders:
+      - "*"
+      maxAge: "24h"

@@ -1,0 +1,4 @@
+[submodule "protos"]
+	path = protos
+	url = git@code.pypygo.com:vertex/ollie-protos.git
+	branch = main

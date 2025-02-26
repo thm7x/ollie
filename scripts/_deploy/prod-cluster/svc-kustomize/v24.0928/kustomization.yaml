@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: env-prod
+resources:
+  - ./grpc-account/
+
+images:
+  - name: ccr.ccs.tencentyun.com/vertex/ollie-account
+    newTag: dd52d13
+

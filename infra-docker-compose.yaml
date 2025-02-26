@@ -1,0 +1,44 @@
+version: '3.9'
+# sudo podman-compose -f docker-compose.yaml up -d
+
+networks:
+  # podman network create devops-local
+  devops-local:
+
+volumes:
+  #volumes卷声明即创建，删除容器卷数据还在
+  pgdata:
+
+services:
+# 基础设施相关
+  postgres_db:
+    container_name: postgres_db
+    image: 'postgres:16.3-alpine'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ops -d devops"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 1G
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "5"
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - ./.local/infra/pgsql:/docker-entrypoint-initdb.d:z
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      TZ: Asia/Shanghai
+      POSTGRES_DB: devops
+      POSTGRES_USER: ops
+      POSTGRES_PASSWORD: "opspassword"
+    networks:
+      - devops-local

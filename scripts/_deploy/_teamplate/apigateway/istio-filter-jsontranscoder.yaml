@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: api-gateway-pb
+spec:
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: GATEWAY
+      listener:
+        filterChain:
+          filter:
+            name: envoy.filters.network.http_connection_manager
+            subFilter:
+              name: envoy.filters.http.router
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.grpc_json_transcoder
+        typed_config:
+          '@type': type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
+          convert_grpc_status: false
+          print_options:
+            add_whitespace: true
+            always_print_enums_as_ints: true
+            always_print_primitive_fields: true
+            preserve_proto_field_names: true
+          proto_descriptor: /etc/istio/<project>-api.binpb
+          # pb接口要兼容，grpcurl -protoset ollie-api.binpb list 新增服务时 直接在下面列表新增即可
+          services:
+          # - account.Account
+  workloadSelector:
+    labels:
+      app: api-gateway
+      istio: ingressgateway

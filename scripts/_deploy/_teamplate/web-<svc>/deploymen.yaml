@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <svc>-<version>
+  labels:
+    project: <project>
+    service: <svc>
+    version: <version>
+spec:
+  selector:
+    matchLabels:
+      project: <project>
+      service: <svc>
+      version: <version>
+  replicas: 1
+  template:
+    metadata:
+      # annotations:
+      #   sidecar.istio.io/proxyImage: ccr.ccs.tencentyun.com/vertex/pop-istio-proxy:028b3be
+        # sidecar.istio.io/proxyMemory: 400Mi
+        # sidecar.istio.io/proxyMemoryLimit: 400Mi
+      labels:
+        project: <project>
+        service: <svc>
+        version: <version>
+        service-type: <service-type> #grpc / http / web
+    spec:
+      nodeSelector:
+        node: <node> #env-prod-grpc / env-prod-http / env-prod-web
+      imagePullSecrets:
+        - name: image-pull-registry
+      containers:
+        - name: web #grpc / http
+          image: <imagens>/<project>-<svc>:<tag>
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep","5"]
+          resources:
+            limits:
+              cpu: "0.15"
+              memory: 400Mi
+            requests:
+              memory: 100Mi
+          env:
+            - name: RUNING_ENV_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: RUNING_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: RUNING_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: timezone
+              mountPath: /etc/localtime
+            - mountPath: /etc/caddy
+              name: caddy-config-yamlfile
+            # - mountPath: /app/logs
+            #   name: logs-volume
+      volumes:
+        - name: timezone
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - configMap:
+            name: caddy-<svc>-cm
+          name: caddy-config-yamlfile
+        # - hostPath:
+        #     path: /data/logs
+        #     type: DirectoryOrCreate
+        #   name: logs-volume

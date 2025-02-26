@@ -1,0 +1,65 @@
+name: build commithash images && push
+on:
+  pull_request:
+    branches:
+      - 'feature/*' #开发集群自测部署，配合mirrord自测，eg: feature/refactor_ci
+      - 'release/v[0-9]{2}\.[0-9]{4}' #线上集群功能发版部署，eg: release/v24.0825
+      - 'hotfix/v[0-9]{2}\.[0-9]{4}-[0-9]+' #线上集群bug修复部署，eg: hotfix/v24.0825-1
+    types:
+      - opened #新建
+      - synchronize #源分支更新
+  
+jobs:
+  服务镜像增量构建:
+    runs-on: host
+    steps:
+      - name: Check out repository code
+        uses: https://gitea.com/actions/checkout@v4
+        with:
+          token: "${{ secrets.GH_PAT }}"
+          # fetch-depth: 2 # 每次都会检查和reabse
+          # 构建分析pr下最新提交
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: true
+          # https://github.com/go-gitea/gitea/issues/26507
+      # - uses: actions/setup-go@v3
+      #   with:
+      #     go-version: '>=1.23.0'
+      - name: PR请求时检查归档分支提交是否领先请求分支
+        run: |
+          pwd
+          git branch
+          GITEA_API_URL="http://192.168.3.35:3000/api/v1"
+          TOKEN="4b36b770f4fd87f2bc61e739c9c1f17319243ae8"
+          REPO_OWNER="vertex"
+          REPO_NAME="podcd"
+          SOURCE_BRANCH=${{gitea.ref_name}}
+          TARGET_BRANCH="main"
+          ON_NAME=${{gitea.event_name}}
+  
+          if [[ $ON_NAME == "pull_request" ]];then
+            echo "处理PR请求..."
+            source_sha=$(curl -s -H "Authorization: token $TOKEN" "$GITEA_API_URL/repos/$REPO_OWNER/$REPO_NAME/commits?sha=$SOURCE_BRANCH&limit=1" | jq -r '.[0].sha')
+            target_sha=$(curl -s -H "Authorization: token $TOKEN" "$GITEA_API_URL/repos/$REPO_OWNER/$REPO_NAME/commits?sha=$TARGET_BRANCH&limit=1" | jq -r '.[0].sha')
+
+            # 查找目标分支和原分支的共同父节点
+            common_ancestor=$(git merge-base $target_sha $source_sha)
+
+            # 比较共同父节点和原分支的提交记录
+            if [[ $common_ancestor != $target_sha ]]; then
+              echo "⚠️☹️ $TARGET_BRANCH 分支领先最新提交或许领先于$SOURCE_BRANCH,退出,请手动merge $TARGET_BRANCH PUSH后重写构建.."
+              exit 1
+            fi
+          fi
+          # sleep 10m
+
+      - name: 构建增量服务版本镜像
+        run: |
+          export branchName=${{gitea.ref_name}}
+          podman login ${{secrets.DOCKERREGISTRY}} --username=${{secrets.DOCKERUSER}}  --password=${{secrets.DOCKERPASSWD}}
+          while IFS= read -r svc; do
+            echo "==============>🎯开始构建 $svc 服务<=============="
+            make image svc=$svc
+            echo "==============>🚩构建 $svc 服务镜像完成<=============="
+          done < deploy.svc
+           

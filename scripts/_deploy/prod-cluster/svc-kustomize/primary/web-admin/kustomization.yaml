@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: env-prod
+resources:
+  # - caddy-cm.yaml
+  - deploymen.yaml
+  - service.yaml
+
+  - istio-dr.yaml
+  - istio-vs.yaml
+
+configMapGenerator:
+  - name: caddy-<svc>-cm
+    files:
+      - Caddyfile
+generatorOptions:
+  disableNameSuffixHash: true
+
+
+commonLabels: 
+    service: web-admin
+    service-type: web
+
+# 精准更改指定deployment的pod配置
+patches:
+- target:
+    kind: Deployment
+    name: web-admin-primary
+  path: patch.yaml

@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: env-prod
+resources:
+  - ./grpc-account/
+
+#  更新v24.0818发布周期的镜像tag版本:commithashcode
+images:
+  - name: ccr.ccs.tencentyun.com/vertex/ollie-account
+    newTag: d12b4122ww
+  - name: ccr.ccs.tencentyun.com/vertex/ollie-release
+    newTag: heshshsh

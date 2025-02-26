@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: env-api-gateway
+resources:
+  - ./sidcar-authx/
+  - ns.yaml
+  - role.yaml
+  - deploy.yaml
+  - service.yaml
+
+  # nethttp过滤器
+  - istio-filter-buffer.yaml
+  - istio-filter-jsontranscoder.yaml
+
+  # 网关域名 tls证书配置
+  - ingressgateway-hosts-listener.yaml
+  - ingressgateway-vs.yaml
+
+  #共享配置
+  - ../imagepull_secrets.yaml
+  - ../casbin-rbac-model-cm.yaml
+  # 这个使用configMapGenerator来自动apply
+  # - ../global-gray-release-cm.yaml
+
+commonLabels: 
+    app: api-gateway
+
+# 精准更改指定deployment的pod配置
+patches:
+- target:
+    kind: Deployment
+    name: istio-ingressgateway-with-authx
+  path: patch.yaml
+

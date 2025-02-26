@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-primary
+  labels:
+    project: devops
+    service: account
+    version: primary
+spec:
+  selector:
+    matchLabels:
+      project: devops
+      service: account
+      version: primary
+  replicas: 1
+  template:
+    metadata:
+      # annotations:
+      #   sidecar.istio.io/proxyImage: ccr.ccs.tencentyun.com/vertex/ollie-istio-proxy:c58c7b3
+        # sidecar.istio.io/proxyMemory: 1024Mi
+        # sidecar.istio.io/proxyMemoryLimit: 1024Mi
+      labels:
+        project: devops
+        service: account
+        version: primary
+        service-type: grpc #grpc / http
+    spec:
+      nodeSelector:
+        node: env-prod-grpc #env-prod-grpc / env-prod-http
+      imagePullSecrets:
+      - name: image-pull-registry
+      containers:
+      - name: grpc #grpc / http
+        image: ccr.ccs.tencentyun.com/vertex/ollie-account:20c197f
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 7001
+        resources:
+          limits:
+            cpu: "0.15"
+            memory: 400Mi
+          requests:
+            memory: 100Mi
+        livenessProbe:
+          grpc:
+            port: 7001
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          grpc:
+            port: 7001
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        env:
+        - name: RUNING_ENV_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: RUNING_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: RUNING_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        volumeMounts:
+        - name: timezone
+          mountPath: /etc/localtime
+        - mountPath: /app/conf
+          name: account-conf-yamlfile
+        - mountPath: /app/casbin
+          name: casbin-rbac-model-config-yamlfile
+        # - mountPath: /app/logs
+        #   name: logs-volume
+      volumes:
+        - name: timezone
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - configMap:
+            name: account-cm
+          name: account-conf-yamlfile
+        - configMap:
+            name: casbin-rbac-model-cm
+          name: casbin-rbac-model-config-yamlfile
+        # - hostPath:
+        #     path: /data/logs
+        #     type: DirectoryOrCreate
+        #   name: logs-volume

@@ -1,0 +1,15 @@
+# Define the service entry for the local authx service on port 7000.
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: local-grpc-authx
+spec:
+  hosts:
+  - "local-grpc-authx.local"
+  endpoints:
+  - address: "127.0.0.1"
+  ports:
+  - name: grpc-port
+    number: 7000
+    protocol: GRPC
+  resolution: STATIC

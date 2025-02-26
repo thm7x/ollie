@@ -1,0 +1,41 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: env-prod
+# service mesh模式 批量更新sidecar容器版本
+# patches:
+#   # all biz sidecar imageupdate
+#   - patch: |-
+#       - op: replace
+#         path: /spec/template/metadata/annotations/sidecar.istio.io~1proxyImage
+#         value: ccr.ccs.tencentyun.com/vertex/ollie-istio-proxy:c58c7b3
+#     target:
+#       group: apps
+#       version: v1
+#       kind: Deployment
+#       namespace: env-prod
+#       labelSelector: "version=primary"
+
+resources:
+  #共享配置
+  - ../imagepull_secrets.yaml
+  - ../casbin-rbac-model-cm.yaml
+
+  - ./web-admin/
+  - ./grpc-account/
+
+
+
+
+# 更新服务全量版本镜像tag版本:commithashcode
+# K8S 部署上采用滚动更新流量稳定性: 合理规划服务就绪探针的initialDelaySeconds值，保持依赖服务流量准入时机一致即可
+images:
+- name: ccr.ccs.tencentyun.com/vertex/ollie-apigateway
+  newTag: 93549bb
+- name: ccr.ccs.tencentyun.com/vertex/ollie-authx
+  newTag: 93549bb
+- name: ccr.ccs.tencentyun.com/vertex/ollie-account
+  newTag: d12b412
+- name: ccr.ccs.tencentyun.com/vertex/ollie-release
+  newTag: d12b412
+- name: ccr.ccs.tencentyun.com/vertex/ollie-admin
+  newTag: 24a5804

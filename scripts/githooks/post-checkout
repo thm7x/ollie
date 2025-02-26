@@ -1,0 +1,31 @@
+#!/bin/bash
+echo "checkout之后执行..."
+
+set -ex
+# 子模块目录
+submodule_dir="protos"
+# 获取主仓库分支的名字
+branch_name=$(git symbolic-ref --short HEAD)
+
+# 切换到子模块目录
+cd $submodule_dir
+# 切换子模块分支到主仓库分支同名分支
+if git rev-parse --verify "$branch_name" >/dev/null 2>&1; then
+    git pull
+else
+    # 提交主仓库修改并推送
+    git checkout -b $branch_name
+    git add .
+    git commit -am "Switch to $branch_name branch"
+    git push --set-upstream origin $branch_name
+fi
+
+# 返回主仓库根目录
+cd ..
+
+if [[ -n $(git status --porcelain) ]]; then
+    # 提交主仓库修改并推送
+    git add .
+    git commit -am "Switch to $branch_name branch"
+    git push --set-upstream origin $branch_name
+fi
