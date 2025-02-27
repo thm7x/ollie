@@ -42,6 +42,10 @@ spec:
             requests:
               memory: 100Mi
           env:
+            - name: RUNING_POD_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
             - name: RUNING_ENV_NAME
               valueFrom:
                 fieldRef:

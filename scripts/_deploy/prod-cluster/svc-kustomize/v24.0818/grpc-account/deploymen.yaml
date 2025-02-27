@@ -52,6 +52,10 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 10
         env:
+        - name: RUNING_POD_UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
         - name: RELEASE_VERSION
           value: "v24.0818"
         - name: RUNING_ENV_NAME
